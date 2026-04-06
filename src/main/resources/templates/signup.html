@@ -1,85 +1,115 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-<title>ServiceMate Signup</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create account — ServiceMate</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-
-body{
-font-family: Arial;
-background: linear-gradient(to right,#4facfe,#00f2fe);
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
-
-.container{
-background:white;
-padding:30px;
-border-radius:10px;
-box-shadow:0px 5px 20px rgba(0,0,0,0.2);
-width:320px;
-text-align:center;
-}
-
-input{
-width:100%;
-padding:10px;
-margin:10px 0;
-border-radius:5px;
-border:1px solid #ccc;
-}
-
-button{
-width:100%;
-padding:10px;
-background:#4facfe;
-color:white;
-border:none;
-border-radius:5px;
-cursor:pointer;
-font-size:15px;
-}
-
-button:hover{
-background:#007bff;
-}
-
-a{
-text-decoration:none;
-color:#007bff;
-}
-
+  :root {
+    --bg:#080810; --border:rgba(255,255,255,0.07); --white:#FFFFFF;
+    --muted:rgba(255,255,255,0.45); --brand:#6C63FF; --brand3:#43E8C8;
+    --glow1:rgba(108,99,255,0.3); --danger:#FF6B6B;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+  .orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0}
+  .orb1{width:400px;height:400px;background:rgba(108,99,255,0.2);top:-100px;right:-100px}
+  .orb2{width:300px;height:300px;background:rgba(255,107,107,0.15);bottom:-80px;left:-80px}
+  .left{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:space-between;padding:2.5rem;border-right:1px solid var(--border);overflow:hidden}
+  .left-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse at 80% 20%,rgba(108,99,255,0.2) 0%,transparent 50%),radial-gradient(ellipse at 20% 80%,rgba(255,107,107,0.1) 0%,transparent 50%)}
+  .shape{position:absolute;border-radius:30% 70% 70% 30% / 30% 30% 70% 70%;border:1px solid rgba(255,255,255,0.05);z-index:0}
+  .shape1{width:280px;height:280px;top:15%;right:-60px;animation:morph 8s ease-in-out infinite}
+  .shape2{width:180px;height:180px;bottom:25%;left:10%;border-color:rgba(67,232,200,0.1);animation:morph 10s ease-in-out infinite reverse}
+  @keyframes morph{0%,100%{border-radius:30% 70% 70% 30%/30% 30% 70% 70%}50%{border-radius:70% 30% 30% 70%/70% 70% 30% 30%}}
+  .left-inner{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:space-between;height:100%}
+  .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;letter-spacing:-0.5px}
+  .logo span{background:linear-gradient(135deg,var(--brand),var(--brand3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .left-content h2{font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:1rem}
+  .left-content h2 em{font-style:normal;background:linear-gradient(135deg,var(--brand3),var(--brand));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .left-content p{color:var(--muted);font-size:15px;line-height:1.7;max-width:300px}
+  .steps{margin-top:2rem;display:flex;flex-direction:column;gap:16px}
+  .step{display:flex;align-items:flex-start;gap:14px}
+  .step-num{min-width:30px;height:30px;border-radius:50%;background:rgba(108,99,255,0.2);border:1px solid rgba(108,99,255,0.4);color:var(--brand3);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .step-text{color:var(--muted);font-size:14px;line-height:1.5}
+  .step-text strong{color:var(--white);display:block;margin-bottom:2px}
+  .left-bottom{color:rgba(255,255,255,0.2);font-size:12px}
+  .right{display:flex;align-items:center;justify-content:center;padding:2rem;position:relative;z-index:1}
+  .form-card{width:100%;max-width:420px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:24px;padding:2.5rem;backdrop-filter:blur(20px);animation:fadeUp 0.5s ease both;box-shadow:0 0 60px rgba(108,99,255,0.08)}
+  .form-title{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;letter-spacing:-1px;margin-bottom:4px}
+  .form-sub{font-size:14px;color:var(--muted);margin-bottom:1.75rem}
+  .error-box{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.25);color:var(--danger);border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:1.25rem}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .field{margin-bottom:1rem}
+  label{display:block;font-size:12px;font-weight:500;color:rgba(255,255,255,0.5);margin-bottom:7px;letter-spacing:0.5px;text-transform:uppercase}
+  input{width:100%;padding:13px 16px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:all 0.2s}
+  input::placeholder{color:rgba(255,255,255,0.2)}
+  input:focus{border-color:var(--brand);background:rgba(108,99,255,0.08);box-shadow:0 0 0 4px rgba(108,99,255,0.1)}
+  .btn-submit{width:100%;padding:14px;border-radius:12px;border:none;margin-top:0.25rem;background:linear-gradient(135deg,var(--brand),#8B83FF);color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 20px var(--glow1)}
+  .btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 30px var(--glow1);filter:brightness(1.1)}
+  .form-footer{text-align:center;margin-top:1.5rem;font-size:14px;color:var(--muted)}
+  .form-footer a{color:var(--brand3);text-decoration:none;font-weight:500}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  @media(max-width:700px){body{grid-template-columns:1fr}.left{display:none}.field-row{grid-template-columns:1fr}}
 </style>
-
 </head>
-
 <body>
-
-<div class="container">
-
-<h2>Create Account</h2>
-
-<form action="/signup" method="post">
-
-<input type="text" name="fullName" placeholder="Full Name" required>
-
-<input type="email" name="email" placeholder="Email" required>
-
-<input type="password" name="password" placeholder="Password" required>
-
-<input type="text" name="phone" placeholder="Phone" required>
-
-<button type="submit">Signup</button>
-
-</form>
-
-<br>
-
-<a href="/">Back to Login</a>
-
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="left">
+  <div class="left-bg"></div>
+  <div class="shape shape1"></div>
+  <div class="shape shape2"></div>
+  <div class="left-inner">
+    <div class="logo">Service<span>Mate</span></div>
+    <div class="left-content">
+      <h2>Join the<br><em>smarter</em><br>way to book.</h2>
+      <p>Thousands of happy customers trust ServiceMate every day.</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Create your account</strong>Takes less than a minute</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Browse 23 services</strong>500+ verified professionals</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Book instantly</strong>Confirmed in under 60 seconds</div></div>
+      </div>
+    </div>
+    <div class="left-bottom">© 2026 ServiceMate</div>
+  </div>
 </div>
+<div class="right">
+  <div class="form-card">
+    <h1 class="form-title">Create account</h1>
+    <p class="form-sub">Free forever. No credit card needed.</p>
+    <div class="error-box" th:if="${error}" th:text="${error}"></div>
+    <form action="/signup" method="post">
+      <div class="field-row">
+        <div class="field"><label>Full name</label><input type="text" name="fullName" placeholder="Rakshith" required></div>
+        <div class="field"><label>Phone</label><input type="text" name="phone" placeholder="9876543210" required></div>
+      </div>
+      <div class="field"><label>Email address</label><input type="email" name="email" placeholder="you@example.com" required></div>
+      <div class="field"><label>Password</label><input type="password" name="password" placeholder="Min. 8 characters" required></div>
+      <button type="submit" class="btn-submit">Create account →</button>
+    </form>
+    <div class="form-footer">Already have an account? <a href="/login">Sign in</a></div>
+  </div>
+</div>
+</body>
+</html>
 
+<div class="right">
+  <div class="form-card">
+    <h1 class="form-title">Create account</h1>
+    <p class="form-sub">Free forever. No credit card needed.</p>
+    <div class="error-box" th:if="${error}" th:text="${error}"></div>
+    <form action="/signup" method="post">
+      <div class="field-row">
+        <div class="field"><label>Full name</label><input type="text" name="fullName" placeholder="Rakshith" required></div>
+        <div class="field"><label>Phone</label><input type="text" name="phone" placeholder="9876543210" required></div>
+      </div>
+      <div class="field"><label>Email address</label><input type="email" name="email" placeholder="you@example.com" required></div>
+      <div class="field"><label>Password</label><input type="password" name="password" placeholder="Min. 8 characters" required></div>
+      <button type="submit" class="btn-submit">Create account →</button>
+    </form>
+    <div class="form-footer">Already have an account? <a href="/login">Sign in</a></div>
+  </div>
+</div>
 </body>
 </html>

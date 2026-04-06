@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ServiceMate</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#080B14;--surface:#0F1320;--surface2:#161C2E;--border:rgba(255,255,255,0.07);--white:#FFFFFF;--muted:rgba(255,255,255,0.45);--brand:#4F7EFF;--brand2:#8B5CF6;--accent:#FF6B6B;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100vh;overflow-x:hidden;}
+  body{font-family:'DM Sans',sans-serif;background:#080B14;color:#FFFFFF;}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:64px;background:rgba(8,11,20,0.95);border-bottom:1px solid rgba(255,255,255,0.07);position:sticky;top:0;z-index:100;}
+  .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-0.5px;}
+  .logo span{background:linear-gradient(135deg,#4F7EFF,#8B5CF6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .nav-right{display:flex;align-items:center;gap:14px;}
+  .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#4F7EFF,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+  .nav-name{font-size:14px;font-weight:500;}
+  .btn-logout{padding:7px 16px;border-radius:100px;border:1px solid rgba(255,255,255,0.07);background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(255,255,255,0.45);cursor:pointer;text-decoration:none;transition:all 0.2s;}
+  .btn-logout:hover{border-color:#FF6B6B;color:#FF6B6B;}
+  .hero-banner{padding:3rem 2rem;background:linear-gradient(145deg,#0A0E1A,#0D1229);border-bottom:1px solid rgba(255,255,255,0.07);}
+  .banner-inner{max-width:1100px;margin:0 auto;}
+  .banner-inner h2{font-family:'Syne',sans-serif;font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;letter-spacing:-1px;margin-bottom:6px;}
+  .banner-inner h2 span{background:linear-gradient(135deg,#4F7EFF,#8B5CF6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .banner-inner p{color:rgba(255,255,255,0.45);font-size:15px;}
+  main{max-width:1100px;margin:0 auto;padding:2rem;}
+  .search-wrap{position:relative;margin-bottom:2.5rem;}
+  .search-input{width:100%;padding:14px 20px 14px 50px;border-radius:14px;border:1px solid rgba(255,255,255,0.07);background:#0F1320;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color 0.2s;}
+  .search-input::placeholder{color:rgba(255,255,255,0.3);}
+  .search-input:focus{border-color:rgba(79,126,255,0.5);}
+  .search-icon{position:absolute;left:17px;top:50%;transform:translateY(-50%);font-size:18px;}
+  .section{margin-bottom:2.5rem;}
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+  .section-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;letter-spacing:-0.3px;}
+  .section-count{font-size:11px;color:rgba(255,255,255,0.4);background:#0F1320;padding:3px 10px;border-radius:100px;border:1px solid rgba(255,255,255,0.07);}
+  .service-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;}
+  .service-card{background:#0F1320;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:1.25rem 1rem;text-align:center;cursor:pointer;transition:all 0.2s;text-decoration:none;display:block;}
+  .service-card:hover{border-color:rgba(79,126,255,0.4);background:#161C2E;transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.3);}
+  .service-emoji{font-size:26px;display:block;margin-bottom:8px;}
+  .service-name{font-size:12px;font-weight:400;color:rgba(255,255,255,0.7);line-height:1.4;}
+  .emergency-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
+  .emergency-card{background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.2);border-radius:16px;padding:1.25rem 1rem;text-align:center;cursor:pointer;transition:all 0.2s;text-decoration:none;display:block;}
+  .emergency-card:hover{background:rgba(255,107,107,0.12);transform:translateY(-3px);}
+  .emergency-card .service-name{color:rgba(255,150,150,0.9);}
+  .tag-247{display:inline-block;background:#FF6B6B;color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:100px;margin-bottom:8px;letter-spacing:0.5px;}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Service<span>Mate</span></div>
+  <div class="nav-right">
+    <div class="avatar" th:text="${user.fullName != null ? user.fullName.substring(0,1).toUpperCase() : 'U'}">U</div>
+    <span class="nav-name" th:text="${user.fullName}">User</span>
+    <a href="/logout" class="btn-logout">Logout</a>
+  </div>
+</nav>
+
+<div class="hero-banner">
+  <div class="banner-inner">
+    <h2>Hey, <span th:text="${user.fullName}">there</span> 👋</h2>
+    <p>What can we help you with today?</p>
+  </div>
+</div>
+
+<main>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="text" placeholder="Search — AC repair, cleaning, plumber...">
+  </div>
+
+  <div class="section">
+    <div class="section-header"><h3 class="section-title">🏠 Home Services</h3><span class="section-count">6 services</span></div>
+    <div class="service-grid">
+      <a href="/services/ac-repair" class="service-card"><span class="service-emoji">❄️</span><span class="service-name">AC Repair</span></a>
+      <a href="/services/electrician" class="service-card"><span class="service-emoji">⚡</span><span class="service-name">Electrician</span></a>
+      <a href="/services/plumber" class="service-card"><span class="service-emoji">🚰</span><span class="service-name">Plumber</span></a>
+      <a href="/services/washing-machine" class="service-card"><span class="service-emoji">🫧</span><span class="service-name">Washing Machine</span></a>
+      <a href="/services/refrigerator" class="service-card"><span class="service-emoji">🧊</span><span class="service-name">Refrigerator Repair</span></a>
+      <a href="/services/tv-installation" class="service-card"><span class="service-emoji">📺</span><span class="service-name">TV Installation</span></a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><h3 class="section-title">🧹 Cleaning Services</h3><span class="section-count">5 services</span></div>
+    <div class="service-grid">
+      <a href="/services/deep-cleaning" class="service-card"><span class="service-emoji">🏠</span><span class="service-name">Home Deep Cleaning</span></a>
+      <a href="/services/bathroom-cleaning" class="service-card"><span class="service-emoji">🚿</span><span class="service-name">Bathroom Cleaning</span></a>
+      <a href="/services/sofa-cleaning" class="service-card"><span class="service-emoji">🛋️</span><span class="service-name">Sofa Cleaning</span></a>
+      <a href="/services/carpet-cleaning" class="service-card"><span class="service-emoji">🪣</span><span class="service-name">Carpet Cleaning</span></a>
+      <a href="/services/kitchen-cleaning" class="service-card"><span class="service-emoji">👨‍🍳</span><span class="service-name">Kitchen Cleaning</span></a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><h3 class="section-title">💆 Personal Services</h3><span class="section-count">4 services</span></div>
+    <div class="service-grid">
+      <a href="/services/haircut" class="service-card"><span class="service-emoji">💇</span><span class="service-name">Haircut at Home</span></a>
+      <a href="/services/makeup" class="service-card"><span class="service-emoji">💄</span><span class="service-name">Makeup Artist</span></a>
+      <a href="/services/spa" class="service-card"><span class="service-emoji">💆</span><span class="service-name">Spa / Massage</span></a>
+      <a href="/services/fitness" class="service-card"><span class="service-emoji">🏋️</span><span class="service-name">Fitness Trainer</span></a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><h3 class="section-title">🚗 Vehicle Services</h3><span class="section-count">4 services</span></div>
+    <div class="service-grid">
+      <a href="/services/bike-servicing" class="service-card"><span class="service-emoji">🏍️</span><span class="service-name">Bike Servicing</span></a>
+      <a href="/services/car-wash" class="service-card"><span class="service-emoji">🚿</span><span class="service-name">Car Washing</span></a>
+      <a href="/services/car-repair" class="service-card"><span class="service-emoji">🔧</span><span class="service-name">Car Repair</span></a>
+      <a href="/services/battery-replacement" class="service-card"><span class="service-emoji">🔋</span><span class="service-name">Battery Replacement</span></a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><h3 class="section-title">🛠️ Local Utility</h3><span class="section-count">4 services</span></div>
+    <div class="service-grid">
+      <a href="/services/painting" class="service-card"><span class="service-emoji">🎨</span><span class="service-name">Home Painting</span></a>
+      <a href="/services/pest-control" class="service-card"><span class="service-emoji">🐛</span><span class="service-name">Pest Control</span></a>
+      <a href="/services/carpenter" class="service-card"><span class="service-emoji">🪚</span><span class="service-name">Carpenter Work</span></a>
+      <a href="/services/interior" class="service-card"><span class="service-emoji">🛋️</span><span class="service-name">Interior Decoration</span></a>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><h3 class="section-title">🚨 Emergency Services</h3><span class="section-count">3 services</span></div>
+    <div class="emergency-grid">
+      <a href="/services/emergency-electrician" class="emergency-card"><div class="tag-247">24/7</div><div class="service-emoji">⚡</div><div class="service-name">Emergency Electrician</div></a>
+      <a href="/services/emergency-plumber" class="emergency-card"><div class="tag-247">24/7</div><div class="service-emoji">🚰</div><div class="service-name">Emergency Plumber</div></a>
+      <a href="/services/locksmith" class="emergency-card"><div class="tag-247">24/7</div><div class="service-emoji">🔐</div><div class="service-name">Lock Repair / Locksmith</div></a>
+    </div>
+  </div>
+</main>
+</body>
+</html>

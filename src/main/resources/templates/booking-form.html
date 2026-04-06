@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Service — ServiceMate</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#080B14;--surface:#0F1320;--surface2:#161C2E;--border:rgba(255,255,255,0.07);--white:#FFFFFF;--muted:rgba(255,255,255,0.45);--brand:#4F7EFF;--brand2:#8B5CF6;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;}
+  nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:64px;background:rgba(8,11,20,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+  .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-0.5px;}
+  .logo span{background:linear-gradient(135deg,var(--brand),var(--brand2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .btn-back{padding:7px 16px;border-radius:100px;border:1px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;text-decoration:none;transition:all 0.2s;}
+  .btn-back:hover{border-color:rgba(255,255,255,0.2);color:var(--white);}
+  main{max-width:600px;margin:0 auto;padding:2.5rem 2rem;}
+  .page-title{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:0.25rem;}
+  .page-sub{font-size:14px;color:var(--muted);margin-bottom:2rem;}
+  .provider-mini{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1rem 1.25rem;margin-bottom:2rem;}
+  .mini-avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:18px;font-weight:800;}
+  .mini-name{font-size:15px;font-weight:500;}
+  .mini-price{font-size:13px;color:var(--muted);}
+  .form-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:2rem;}
+  .field{margin-bottom:1.25rem;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  label{display:block;font-size:13px;font-weight:500;color:rgba(255,255,255,0.6);margin-bottom:8px;letter-spacing:0.3px;}
+  input,select,textarea{width:100%;padding:13px 16px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+  input::placeholder,textarea::placeholder{color:rgba(255,255,255,0.2);}
+  input:focus,select:focus,textarea:focus{border-color:rgba(79,126,255,0.6);box-shadow:0 0 0 4px rgba(79,126,255,0.1);}
+  select option{background:var(--surface2);color:var(--white);}
+  textarea{resize:vertical;min-height:80px;}
+  .btn-submit{width:100%;padding:15px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand2));color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;margin-top:0.5rem;transition:all 0.2s;}
+  .btn-submit:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(79,126,255,0.4);}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Service<span>Mate</span></div>
+  <a th:href="@{/provider/{id}(id=${provider.id})}" class="btn-back">← Back</a>
+</nav>
+
+<main>
+  <h1 class="page-title">Book Service</h1>
+  <p class="page-sub">Fill in the details and we'll confirm your booking</p>
+
+  <div class="provider-mini">
+    <div class="mini-avatar" th:text="${provider.name.substring(0,1).toUpperCase()}">A</div>
+    <div>
+      <div class="mini-name" th:text="${provider.name}">Provider</div>
+      <div class="mini-price">₹<span th:text="${provider.pricePerHour}">299</span>/hr · AC Repair</div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <form th:action="@{/book/{id}(id=${provider.id})}" method="post">
+      <div class="field-row">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" name="bookingDate" th:min="${today}" required>
+        </div>
+        <div class="field">
+          <label>Time slot</label>
+          <select name="bookingTime" required>
+            <option value="">Select time</option>
+            <option value="08:00">8:00 AM</option>
+            <option value="09:00">9:00 AM</option>
+            <option value="10:00">10:00 AM</option>
+            <option value="11:00">11:00 AM</option>
+            <option value="12:00">12:00 PM</option>
+            <option value="14:00">2:00 PM</option>
+            <option value="15:00">3:00 PM</option>
+            <option value="16:00">4:00 PM</option>
+            <option value="17:00">5:00 PM</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Your address</label>
+        <input type="text" name="address" placeholder="Flat no, street, area, city" required>
+      </div>
+      <div class="field">
+        <label>Notes (optional)</label>
+        <textarea name="notes" placeholder="e.g. 1.5 ton split AC, not cooling properly..."></textarea>
+      </div>
+      <button type="submit" class="btn-submit">Confirm Booking →</button>
+    </form>
+  </div>
+</main>
+</body>
+</html>

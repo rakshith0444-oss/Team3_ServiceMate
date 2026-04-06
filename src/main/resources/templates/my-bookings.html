@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Bookings — ServiceMate</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#080B14;--surface:#0F1320;--surface2:#161C2E;--border:rgba(255,255,255,0.07);--white:#FFFFFF;--muted:rgba(255,255,255,0.45);--brand:#4F7EFF;--brand2:#8B5CF6;--green:#22D3A5;--accent:#FF6B6B;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;}
+  nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:64px;background:rgba(8,11,20,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+  .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-0.5px;}
+  .logo span{background:linear-gradient(135deg,var(--brand),var(--brand2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .btn-back{padding:7px 16px;border-radius:100px;border:1px solid var(--border);background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;text-decoration:none;transition:all 0.2s;}
+  .btn-back:hover{border-color:rgba(255,255,255,0.2);color:var(--white);}
+  main{max-width:750px;margin:0 auto;padding:2.5rem 2rem;}
+  .page-header{margin-bottom:2rem;}
+  .page-title{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px;}
+  .page-sub{font-size:14px;color:var(--muted);}
+  .empty{text-align:center;padding:4rem 2rem;color:var(--muted);}
+  .empty-icon{font-size:3rem;margin-bottom:1rem;}
+  .empty a{color:var(--brand);text-decoration:none;}
+  .booking-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.5rem;margin-bottom:14px;transition:all 0.2s;}
+  .booking-card:hover{border-color:rgba(79,126,255,0.3);}
+  .booking-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;}
+  .booking-provider{display:flex;align-items:center;gap:12px;}
+  .mini-avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:18px;font-weight:800;flex-shrink:0;}
+  .provider-name{font-size:15px;font-weight:500;margin-bottom:2px;}
+  .provider-cat{font-size:13px;color:var(--muted);}
+  .status-badge{padding:4px 12px;border-radius:100px;font-size:12px;font-weight:500;}
+  .status-PENDING{background:rgba(255,200,0,0.12);border:1px solid rgba(255,200,0,0.3);color:#FFD700;}
+  .status-CONFIRMED{background:rgba(34,211,165,0.12);border:1px solid rgba(34,211,165,0.3);color:var(--green);}
+  .status-COMPLETED{background:rgba(79,126,255,0.12);border:1px solid rgba(79,126,255,0.3);color:var(--brand);}
+  .status-CANCELLED{background:rgba(255,107,107,0.12);border:1px solid rgba(255,107,107,0.3);color:var(--accent);}
+  .booking-details{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .detail{background:var(--surface2);border-radius:10px;padding:10px 14px;}
+  .detail-label{font-size:11px;color:var(--muted);margin-bottom:3px;}
+  .detail-val{font-size:14px;font-weight:500;}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Service<span>Mate</span></div>
+  <a href="/dashboard" class="btn-back">← Dashboard</a>
+</nav>
+
+<main>
+  <div class="page-header">
+    <h1 class="page-title">My Bookings</h1>
+    <p class="page-sub" th:text="'Hello ' + ${user.fullName} + ', here are all your bookings'">Bookings</p>
+  </div>
+
+  <div th:if="${bookings.empty}" class="empty">
+    <div class="empty-icon">📋</div>
+    <p>No bookings yet. <a href="/services/ac-repair">Book your first service →</a></p>
+  </div>
+
+  <div th:unless="${bookings.empty}">
+    <div th:each="b : ${bookings}" class="booking-card">
+      <div class="booking-top">
+        <div class="booking-provider">
+          <div class="mini-avatar" th:text="${b.provider.name.substring(0,1).toUpperCase()}">A</div>
+          <div>
+            <div class="provider-name" th:text="${b.provider.name}">Provider</div>
+            <div class="provider-cat">AC Repair & Servicing</div>
+          </div>
+        </div>
+        <span th:class="'status-badge status-' + ${b.status}" th:text="${b.status}">PENDING</span>
+      </div>
+      <div class="booking-details">
+        <div class="detail"><div class="detail-label">Date</div><div class="detail-val" th:text="${b.bookingDate}">Date</div></div>
+        <div class="detail"><div class="detail-label">Time</div><div class="detail-val" th:text="${b.bookingTime}">Time</div></div>
+        <div class="detail"><div class="detail-label">Address</div><div class="detail-val" th:text="${b.address}">Address</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>
