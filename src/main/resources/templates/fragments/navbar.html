@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <!-- Standard Internal Navbar Fragment -->
+  <nav th:fragment="navbar">
+    <a href="/dashboard" class="logo">Service<span>Mate</span></a>
+    <div class="nav-right">
+      <a href="/dashboard" class="btn-ghost">← Dashboard</a>
+      <a href="/my-bookings" class="btn-primary">My Bookings</a>
+      <a href="/logout" class="btn-ghost">Logout</a>
+    </div>
+  </nav>
+</body>
+</html>

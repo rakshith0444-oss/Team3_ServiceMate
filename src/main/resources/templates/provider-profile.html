@@ -33,23 +33,43 @@
   .divider{border:none;border-top:1px solid var(--border);margin:1.5rem 0;}
   .info-row{display:flex;gap:8px;align-items:center;font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:10px;}
   .info-icon{font-size:16px;width:24px;}
-  .book-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+  .book-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:16px;}
   .book-left .price{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;}
   .book-left .price-label{font-size:13px;color:var(--muted);}
   .book-left .note{font-size:12px;color:var(--muted);margin-top:4px;}
   .btn-book{padding:14px 36px;border-radius:14px;background:linear-gradient(135deg,var(--brand),var(--brand2));color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;border:none;cursor:pointer;text-decoration:none;transition:all 0.2s;display:inline-block;}
   .btn-book:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,126,255,0.4);}
+
+  /* Reviews section */
+  .reviews-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:2rem;margin-bottom:16px;}
+  .reviews-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+  .reviews-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;}
+  .avg-rating{display:flex;align-items:center;gap:8px;}
+  .avg-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:#FFD700;}
+  .avg-stars{font-size:18px;letter-spacing:2px;}
+  .avg-sub{font-size:12px;color:var(--muted);}
+  .review-item{border-bottom:1px solid var(--border);padding:1rem 0;}
+  .review-item:last-child{border-bottom:none;padding-bottom:0;}
+  .review-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .reviewer{display:flex;align-items:center;gap:10px;}
+  .reviewer-avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+  .reviewer-name{font-size:14px;font-weight:500;}
+  .reviewer-date{font-size:11px;color:var(--muted);}
+  .review-stars{color:#FFD700;font-size:13px;letter-spacing:1px;}
+  .review-text{font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;}
+  .show-more-btn{display:block;width:100%;margin-top:1rem;padding:10px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;text-align:center;}
+  .show-more-btn:hover{border-color:rgba(255,255,255,0.2);color:var(--white);}
 </style>
 </head>
 <body>
 <nav>
   <div class="logo">Service<span>Mate</span></div>
-  <a href="/services/ac-repair" class="btn-back">← Back to providers</a>
+  <a th:href="@{/services/{cat}(cat=${provider.category})}" class="btn-back">← Back to providers</a>
 </nav>
 
 <main>
   <div class="breadcrumb">
-    <a href="/dashboard">Home</a> › <a href="/services/ac-repair">AC Repair</a> › <span th:text="${provider.name}">Provider</span>
+    <a href="/dashboard">Home</a> › <a th:href="@{/services/{cat}(cat=${provider.category})}" style="text-transform: capitalize;" th:text="${#strings.replace(provider.category, '-', ' ')}">Service</a> › <span th:text="${provider.name}">Provider</span>
   </div>
 
   <div class="profile-card">
@@ -57,7 +77,7 @@
       <div class="big-avatar" th:text="${provider.name.substring(0,1).toUpperCase()}">A</div>
       <div class="profile-info">
         <h1 th:text="${provider.name}">Provider Name</h1>
-        <div class="exp" th:text="${provider.experience} + ' experience · AC Repair Specialist'">5 years</div>
+        <div class="exp" style="text-transform: capitalize;" th:text="${provider.experience} + ' experience · ' + ${#strings.replace(provider.category, '-', ' ')} + ' Specialist'">5 years</div>
         <span class="avail-badge">● Available for booking</span>
       </div>
     </div>
@@ -76,7 +96,7 @@
 
     <div class="info-row"><span class="info-icon">📍</span><span th:text="'Serves: ' + ${provider.location}">Location</span></div>
     <div class="info-row"><span class="info-icon">📞</span><span th:text="${provider.phone}">Phone</span></div>
-    <div class="info-row"><span class="info-icon">❄️</span><span>Speciality: AC installation, repair & servicing</span></div>
+    <div class="info-row"><span class="info-icon">🌟</span><span style="text-transform: capitalize;" th:text="'Speciality: ' + ${#strings.replace(provider.category, '-', ' ')} + ' services'">Speciality</span></div>
   </div>
 
   <div class="book-card">
@@ -87,6 +107,116 @@
     </div>
     <a th:href="@{/book/{id}(id=${provider.id})}" class="btn-book">Book Now →</a>
   </div>
+
+  <!-- Reviews Section -->
+  <div class="reviews-card">
+    <div class="reviews-header">
+      <div class="reviews-title">Customer Reviews</div>
+      <div class="avg-rating">
+        <div>
+          <div class="avg-val" th:text="${provider.rating}">4.8</div>
+          <div class="avg-sub" th:text="${provider.reviewCount} + ' reviews'">128 reviews</div>
+        </div>
+        <div>
+          <div class="avg-stars">★★★★★</div>
+        </div>
+      </div>
+    </div>
+    <!-- Reviews rendered by JS below -->
+    <div id="reviews-list"></div>
+    <button class="show-more-btn" id="show-more-btn" style="display:none">Show more reviews</button>
+  </div>
 </main>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+(function() {
+  const totalReviews = /*[[${provider.reviewCount}]]*/ 10;
+  const rating      = /*[[${provider.rating}]]*/ 4.5;
+  const category    = /*[[${provider.category}]]*/ 'service';
+
+  const firstNames = ['Rahul','Priya','Ankit','Sneha','Vijay','Kavya','Ravi','Deepa','Arjun','Meera',
+                      'Suresh','Neha','Harish','Pooja','Kiran','Divya','Manoj','Asha','Rohit','Swati'];
+  const lastNames  = ['Sharma','Patel','Kumar','Singh','Reddy','Nair','Joshi','Mehta','Gupta','Verma'];
+
+  const reviewTexts = {
+    'ac-repair':         ['Fixed my AC perfectly, cool breeze restored!','Very professional, diagnosed the issue quickly.','Excellent work, AC works like new now.','Honest and efficient service.'],
+    'electrician':       ['Resolved my wiring issue safely.','Quick and clean work, no mess left behind.','Very knowledgeable electrician.','Fixed within an hour, highly recommend.'],
+    'plumber':           ['Stopped the leak in minutes!','Great plumber, fixed pipe without breaking walls.','Professional and tidy work.','Resolved our drainage issue perfectly.'],
+    'deep-cleaning':     ['House looks sparkling clean!','Thorough job, every corner cleaned.','Best cleaning service I have used.','Very professional team.'],
+    'haircut':           ['Perfect haircut as requested.','Skilled stylist, very neat work.','Excellent grooming at home!','Very gentle and professional.'],
+    'car-wash':          ['Car looks brand new!','Detailed cleaning done perfectly.','Very thorough and quick.','Great service at home.'],
+    'default':           ['Excellent service, highly recommend!','Very professional and punctual.','Did a great job, will book again.','Friendly and efficient service.']
+  };
+
+  function getTexts() {
+    for (const key of Object.keys(reviewTexts)) {
+      if (category.includes(key)) return reviewTexts[key];
+    }
+    return reviewTexts['default'];
+  }
+
+  function seededRandom(seed) {
+    let x = Math.sin(seed + 1) * 10000;
+    return x - Math.floor(x);
+  }
+
+  function buildStars(r) {
+    const full = Math.floor(r);
+    let s = '';
+    for (let i = 0; i < 5; i++) s += i < full ? '★' : '☆';
+    return s;
+  }
+
+  function relativeDate(offset) {
+    const d = new Date();
+    d.setDate(d.getDate() - offset);
+    return d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  }
+
+  const texts = getTexts();
+  const count = Math.min(totalReviews, 20);
+  const SHOW = 4;
+  const list = document.getElementById('reviews-list');
+  const btn  = document.getElementById('show-more-btn');
+  let shown = 0;
+
+  function addReviews(from, to) {
+    for (let i = from; i < to && i < count; i++) {
+      const fn = firstNames[Math.floor(seededRandom(i * 7) * firstNames.length)];
+      const ln = lastNames[Math.floor(seededRandom(i * 13) * lastNames.length)];
+      const txt = texts[Math.floor(seededRandom(i * 3) * texts.length)];
+      const r   = Math.min(5, Math.max(3, Math.round((rating + (seededRandom(i * 11) - 0.5)) * 2) / 2));
+      const dOff = Math.floor(seededRandom(i * 5) * 180) + 1;
+
+      const el = document.createElement('div');
+      el.className = 'review-item';
+      el.innerHTML = `
+        <div class="review-top">
+          <div class="reviewer">
+            <div class="reviewer-avatar">${fn[0]}</div>
+            <div>
+              <div class="reviewer-name">${fn} ${ln}</div>
+              <div class="reviewer-date">${relativeDate(dOff)}</div>
+            </div>
+          </div>
+          <div class="review-stars">${buildStars(r)}</div>
+        </div>
+        <div class="review-text">${txt}</div>
+      `;
+      list.appendChild(el);
+    }
+    shown = to;
+    btn.style.display = shown < count ? 'block' : 'none';
+  }
+
+  addReviews(0, SHOW);
+
+  btn.addEventListener('click', () => {
+    addReviews(shown, shown + SHOW);
+  });
+})();
+/*]]>*/
+</script>
 </body>
 </html>

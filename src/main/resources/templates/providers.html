@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title th:text="${serviceTitle} + ' — ServiceMate'">Service — ServiceMate</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" th:href="@{/css/global.css}">
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="hero-internal">
+  <div class="breadcrumb"><a href="/dashboard">Home</a> › <span th:text="${serviceTitle}">Service</span></div>
+  <h1><span th:text="${serviceEmoji}">🔧</span> <span th:text="${serviceTitle}">Service Name</span></h1>
+  <p th:text="${serviceDesc}">Find the best professionals near you</p>
+</div>
+
+<main>
+  <div class="filters">
+    <button class="filter-btn active">All</button>
+    <button class="filter-btn">Top Rated</button>
+    <button class="filter-btn">Lowest Price</button>
+  </div>
+
+  <div th:if="${providers.empty}" class="empty">
+    <div class="empty-icon" th:text="${serviceEmoji}">🔧</div>
+    <p>No providers available right now. Check back soon!</p>
+  </div>
+
+  <div class="providers-grid" th:unless="${providers.empty}">
+    <a th:each="p : ${providers}" th:href="@{/provider/{id}(id=${p.id})}" class="provider-card">
+      <div class="card-top">
+        <div class="provider-avatar" th:text="${p.name.substring(0,1).toUpperCase()}">A</div>
+        <span class="avail-badge">● Available</span>
+      </div>
+      <div class="provider-name" th:text="${p.name}">Name</div>
+      <div class="provider-exp" th:text="${p.experience} + ' experience'">5 years</div>
+      <div class="provider-desc" th:text="${p.description}">Description</div>
+      <div class="card-stats">
+        <div><div class="stat-val gold" th:text="${p.rating} + ' ★'">4.8 ★</div><div class="stat-label">Rating</div></div>
+        <div><div class="stat-val" th:text="${p.reviewCount}">128</div><div class="stat-label">Reviews</div></div>
+        <div><div class="stat-val" th:text="${p.location}">Area</div><div class="stat-label">Location</div></div>
+      </div>
+      <div class="card-footer">
+        <div class="price">₹<span th:text="${p.pricePerHour}">299</span> <span>/ hr</span></div>
+        <div class="btn-view">View Profile →</div>
+      </div>
+    </a>
+  </div>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.querySelector('.providers-grid');
+    if(!grid) return; // if it's the empty state
+    
+    const buttons = document.querySelectorAll('.filter-btn');
+    let cards = Array.from(grid.querySelectorAll('.provider-card'));
+    const originalOrder = [...cards];
+    
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const filterType = btn.textContent;
+            
+            if (filterType === 'All') {
+                cards = [...originalOrder];
+            } else if (filterType === 'Top Rated') {
+                cards.sort((a, b) => {
+                    const ratingA = parseFloat(a.querySelector('.stat-val.gold').textContent) || 0;
+                    const ratingB = parseFloat(b.querySelector('.stat-val.gold').textContent) || 0;
+                    return ratingB - ratingA;
+                });
+            } else if (filterType === 'Lowest Price') {
+                cards.sort((a, b) => {
+                    const priceA = parseFloat(a.querySelector('.price span').textContent) || 0;
+                    const priceB = parseFloat(b.querySelector('.price span').textContent) || 0;
+                    return priceA - priceB;
+                });
+            }
+            
+            grid.innerHTML = '';
+            cards.forEach((card, index) => {
+                // reset animation so it replays
+                card.style.animation = 'none';
+                card.offsetHeight; /* trigger reflow */
+                card.style.animation = `fadeUp 0.4s ${index * 0.05}s ease both`;
+                grid.appendChild(card);
+            });
+        });
+    });
+});
+</script>
+
+</body>
+</html>

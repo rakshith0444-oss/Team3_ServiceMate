@@ -13,10 +13,14 @@
   nav{display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:64px;background:rgba(8,11,20,0.95);border-bottom:1px solid rgba(255,255,255,0.07);position:sticky;top:0;z-index:100;}
   .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-0.5px;}
   .logo span{background:linear-gradient(135deg,#4F7EFF,#8B5CF6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-  .nav-right{display:flex;align-items:center;gap:14px;}
-  .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#4F7EFF,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
-  .nav-name{font-size:14px;font-weight:500;}
-  .btn-logout{padding:7px 16px;border-radius:100px;border:1px solid rgba(255,255,255,0.07);background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(255,255,255,0.45);cursor:pointer;text-decoration:none;transition:all 0.2s;}
+  .nav-right{display:flex;align-items:center;gap:10px;}
+  .nav-link{padding:7px 14px;border-radius:100px;border:1px solid rgba(255,255,255,0.07);background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(255,255,255,0.55);cursor:pointer;text-decoration:none;transition:all 0.2s;}
+  .nav-link:hover{border-color:rgba(255,255,255,0.2);color:#fff;}
+  .nav-link.active{background:rgba(79,126,255,0.12);border-color:rgba(79,126,255,0.35);color:#4F7EFF;}
+  .notif-wrap{position:relative;display:inline-flex;}
+  .notif-badge{position:absolute;top:-5px;right:-5px;background:var(--accent);border-radius:50%;width:17px;height:17px;font-size:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;border:2px solid #080B14;}
+  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4F7EFF,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+  .btn-logout{padding:7px 14px;border-radius:100px;border:1px solid rgba(255,255,255,0.07);background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(255,255,255,0.45);cursor:pointer;text-decoration:none;transition:all 0.2s;}
   .btn-logout:hover{border-color:#FF6B6B;color:#FF6B6B;}
   .hero-banner{padding:3rem 2rem;background:linear-gradient(145deg,#0A0E1A,#0D1229);border-bottom:1px solid rgba(255,255,255,0.07);}
   .banner-inner{max-width:1100px;margin:0 auto;}
@@ -49,8 +53,14 @@
 <nav>
   <div class="logo">Service<span>Mate</span></div>
   <div class="nav-right">
+    <a href="/my-bookings" class="nav-link">📋 My Bookings</a>
+    <div class="notif-wrap">
+      <a href="/notifications" class="nav-link">🔔
+        <span class="notif-badge" th:if="${unreadCount != null and unreadCount gt 0}" th:text="${unreadCount}"></span>
+      </a>
+    </div>
+    <a href="/profile" class="nav-link">👤 Profile</a>
     <div class="avatar" th:text="${user.fullName != null ? user.fullName.substring(0,1).toUpperCase() : 'U'}">U</div>
-    <span class="nav-name" th:text="${user.fullName}">User</span>
     <a href="/logout" class="btn-logout">Logout</a>
   </div>
 </nav>
@@ -130,5 +140,35 @@
     </div>
   </div>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.querySelector('.search-input');
+    const serviceCards = document.querySelectorAll('.service-card, .emergency-card');
+    const sections = document.querySelectorAll('.section');
+    
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        
+        serviceCards.forEach(card => {
+            const name = card.querySelector('.service-name').textContent.toLowerCase();
+            if(name.includes(term)) {
+                card.style.display = 'block';
+                card.style.animation = 'fadeUp 0.3s ease both';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        // Hide sections that have no visible cards
+        sections.forEach(section => {
+            const cards = Array.from(section.querySelectorAll('.service-card, .emergency-card'));
+            const hasVisible = cards.some(card => card.style.display !== 'none');
+            section.style.display = hasVisible ? 'block' : 'none';
+        });
+    });
+});
+</script>
+
 </body>
 </html>

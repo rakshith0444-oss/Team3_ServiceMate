@@ -48,7 +48,7 @@
     <div class="mini-avatar" th:text="${provider.name.substring(0,1).toUpperCase()}">A</div>
     <div>
       <div class="mini-name" th:text="${provider.name}">Provider</div>
-      <div class="mini-price">₹<span th:text="${provider.pricePerHour}">299</span>/hr · AC Repair</div>
+      <div class="mini-price">₹<span th:text="${provider.pricePerHour}">299</span>/hr · <span style="text-transform: capitalize;" th:text="${#strings.replace(provider.category, '-', ' ')}">Service</span></div>
     </div>
   </div>
 
@@ -81,7 +81,7 @@
       </div>
       <div class="field">
         <label>Notes (optional)</label>
-        <textarea name="notes" placeholder="e.g. 1.5 ton split AC, not cooling properly..."></textarea>
+        <textarea name="notes" placeholder="Please describe exactly what you need help with..."></textarea>
       </div>
       <button type="submit" class="btn-submit">Confirm Booking →</button>
     </form>

@@ -32,7 +32,7 @@
 <div class="card">
   <div class="success-icon">✅</div>
   <h1>Booking Confirmed!</h1>
-  <p class="sub">Your AC repair has been booked. The technician will arrive at your address on time.</p>
+  <p class="sub" th:text="'Your ' + ${#strings.replace(booking.provider.category, '-', ' ')} + ' has been booked with ' + ${booking.provider.name} + '. The professional will arrive at your address on time.'">Your service has been booked.</p>
 
   <div class="details">
     <div class="detail-row">

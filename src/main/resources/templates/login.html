@@ -134,18 +134,15 @@
 <div class="right">
   <div class="form-card">
     <h1 class="form-title">Welcome back</h1>
-    <p class="form-sub">Sign in to your account</p>
+    <p class="form-sub">Enter your email — we'll send you a one-time code</p>
     <div class="error-box" th:if="${error}">⚠️ <span th:text="${error}"></span></div>
+    <div style="background:rgba(34,211,165,0.1);border:1px solid rgba(34,211,165,0.3);color:#22D3A5;border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:1.25rem;" th:if="${param.registered}">✅ Account created! Please sign in with your email.</div>
     <form action="/login" method="post">
       <div class="field">
         <label>Email address</label>
-        <input type="email" name="email" placeholder="you@example.com" required>
+        <input type="email" name="email" placeholder="you@example.com" required autofocus>
       </div>
-      <div class="field">
-        <label>Password</label>
-        <input type="password" name="password" placeholder="••••••••" required>
-      </div>
-      <button type="submit" class="btn-submit">Sign in →</button>
+      <button type="submit" class="btn-submit" id="sendOtpBtn">Send OTP →</button>
     </form>
     <div class="form-footer">No account? <a href="/signup">Sign up free</a></div>
   </div>

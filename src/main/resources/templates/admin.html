@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — ServiceMate</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" th:href="@{/css/global.css}">
+<style>
+  /* Edit modal styles */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal-box{background:#0F1320;border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:2rem;max-width:560px;width:90%;max-height:90vh;overflow-y:auto;}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+  .modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;}
+  .modal-close{background:none;border:none;color:rgba(255,255,255,0.45);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:8px;transition:all 0.2s;}
+  .modal-close:hover{color:#fff;background:rgba(255,255,255,0.06);}
+  .modal-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem;}
+  .modal-field{display:flex;flex-direction:column;gap:6px;}
+  .modal-field.full{grid-column:1/-1;}
+  .modal-field label{font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.8px;}
+  .modal-field input,.modal-field textarea{padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:#161C2E;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;}
+  .modal-field input:focus,.modal-field textarea:focus{border-color:rgba(79,126,255,0.5);}
+  .modal-field textarea{resize:vertical;min-height:70px;}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+  .btn-modal-save{padding:10px 24px;border-radius:10px;border:none;background:linear-gradient(135deg,#4F7EFF,#8B5CF6);color:#fff;font-family:'DM Sans';font-size:14px;cursor:pointer;transition:all 0.2s;}
+  .btn-modal-save:hover{opacity:0.9;}
+  .btn-modal-cancel{padding:10px 20px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:transparent;color:rgba(255,255,255,0.5);font-family:'DM Sans';font-size:14px;cursor:pointer;transition:all 0.2s;}
+  .btn-modal-cancel:hover{color:#fff;border-color:rgba(255,255,255,0.2);}
+
+  /* Table search */
+  .search-bar{width:100%;padding:10px 16px 10px 40px;border-radius:10px;border:1px solid rgba(255,255,255,0.07);background:#161C2E;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:1rem;transition:border-color 0.2s;}
+  .search-bar:focus{border-color:rgba(79,126,255,0.5);}
+  .search-wrap-admin{position:relative;}
+  .search-wrap-admin::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;}
+  .no-match{text-align:center;padding:2rem;color:rgba(255,255,255,0.35);font-size:14px;display:none;}
+</style>
+</head>
+<body class="admin-body">
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">Service<span>Mate</span></div>
+  <div class="sidebar-nav">
+    <a class="nav-item active" onclick="showTab('providers', this)"><span class="nav-icon">👥</span> Providers</a>
+    <a class="nav-item" onclick="showTab('bookings', this)"><span class="nav-icon">📋</span> Bookings</a>
+    <a class="nav-item" onclick="showTab('users', this)"><span class="nav-icon">🙍</span> Users</a>
+    <a class="nav-item" onclick="showTab('add', this)"><span class="nav-icon">➕</span> Add Provider</a>
+    <a class="nav-item" href="/dashboard"><span class="nav-icon">🏠</span> Dashboard</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="admin-badge">⚙️ Admin Panel</div>
+    <a href="/logout" class="btn-logout-side">Logout</a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="admin-main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <h1>Admin Panel</h1>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid-admin">
+    <div class="stat-card-admin blue">
+      <div class="stat-icon">👥</div>
+      <div class="stat-val-admin" th:text="${providers.size()}">0</div>
+      <div class="stat-label">Total Providers</div>
+    </div>
+    <div class="stat-card-admin green">
+      <div class="stat-icon">✅</div>
+      <div class="stat-val-admin" th:text="${providers.?[available].size()}">0</div>
+      <div class="stat-label">Available Now</div>
+    </div>
+    <div class="stat-card-admin purple">
+      <div class="stat-icon">📋</div>
+      <div class="stat-val-admin" th:text="${bookings.size()}">0</div>
+      <div class="stat-label">Total Bookings</div>
+    </div>
+    <div class="stat-card-admin red">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-val-admin" th:text="${bookings.?[status == 'PENDING'].size()}">0</div>
+      <div class="stat-label">Pending</div>
+    </div>
+  </div>
+
+  <!-- CHART SECTION -->
+  <div class="card-admin" style="margin-bottom: 2.5rem;">
+    <div class="card-title">System Overview: All Bookings</div>
+    <div style="height: 250px; position: relative;">
+      <canvas id="mainChart"></canvas>
+    </div>
+  </div>
+
+  <!-- PROVIDERS TAB -->
+  <div id="tab-providers" class="section active">
+    <div class="card-admin">
+      <div class="card-title">All Providers (<span th:text="${providers.size()}">0</span>)</div>
+      <div class="search-wrap-admin">
+        <input type="text" class="search-bar" id="provider-search" placeholder="Search by name, category or location…" oninput="filterTable('provider-search','providers-tbody','provider-no-match')">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Category</th>
+              <th>Location</th>
+              <th>Rating</th>
+              <th>Price/hr</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="providers-tbody">
+            <tr th:each="p : ${providers}">
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div class="provider-avatar-sm" th:text="${p.name.substring(0,1).toUpperCase()}">A</div>
+                  <div>
+                    <div style="font-weight:500;" th:text="${p.name}">Name</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.4);" th:text="${p.phone}">Phone</div>
+                  </div>
+                </div>
+              </td>
+              <td th:text="${p.category}">Category</td>
+              <td th:text="${p.location}">Location</td>
+              <td style="color:#FFD700;" th:text="${p.rating} + '★'">4.8★</td>
+              <td th:text="'₹' + ${p.pricePerHour}">₹299</td>
+              <td>
+                <span th:if="${p.available}" class="avail-on">● Available</span>
+                <span th:unless="${p.available}" class="avail-off">● Unavailable</span>
+              </td>
+              <td>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button class="btn-sm"
+                          style="background:rgba(79,126,255,0.15);border:1px solid rgba(79,126,255,0.3);color:#4F7EFF;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:'DM Sans';font-size:12px;"
+                          th:onclick="'openEditModal(' + ${p.id} + ',\'' + ${p.name} + '\',\'' + ${p.phone} + '\',\'' + ${p.location} + '\',\'' + ${p.experience} + '\',' + ${p.pricePerHour} + ',' + ${p.rating} + ',' + ${p.reviewCount} + ',\'' + ${p.description} + '\')'">
+                    Edit
+                  </button>
+                  <a th:href="@{/admin/toggle-provider/{id}(id=${p.id})}"
+                     th:class="${p.available} ? 'btn-sm btn-toggle-on' : 'btn-sm btn-toggle-off'"
+                     th:text="${p.available} ? 'Disable' : 'Enable'">Toggle</a>
+                  <a th:href="@{/admin/delete-provider/{id}(id=${p.id})}" class="btn-sm btn-delete"
+                     onclick="return confirm('Delete this provider?')">Delete</a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="no-match" id="provider-no-match">No providers match your search.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOOKINGS TAB -->
+  <div id="tab-bookings" class="section">
+    <div class="card-admin">
+      <div class="card-title">All Bookings (<span th:text="${bookings.size()}">0</span>)</div>
+      <div class="search-wrap-admin">
+        <input type="text" class="search-bar" id="booking-search" placeholder="Search by customer or provider name…" oninput="filterTable('booking-search','bookings-tbody','booking-no-match')">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Customer</th>
+              <th>Provider</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Address</th>
+              <th>Status</th>
+              <th>Update</th>
+            </tr>
+          </thead>
+          <tbody id="bookings-tbody">
+            <tr th:each="b : ${bookings}">
+              <td th:text="${b.id}">1</td>
+              <td th:text="${b.user.fullName}">User</td>
+              <td th:text="${b.provider.name}">Provider</td>
+              <td th:text="${b.bookingDate}">Date</td>
+              <td th:text="${b.bookingTime}">Time</td>
+              <td th:text="${b.address}">Address</td>
+              <td><span th:class="'status-' + ${b.status}" th:text="${b.status}">PENDING</span></td>
+              <td>
+                <form th:action="@{/admin/update-booking-status/{id}(id=${b.id})}" method="post"
+                      style="display:flex;gap:6px;align-items:center;">
+                  <select name="status"
+                    style="padding:5px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);
+                           background:#161C2E;color:#fff;font-family:'DM Sans';font-size:12px;cursor:pointer;">
+                    <option value="PENDING"    th:selected="${b.status == 'PENDING'}">PENDING</option>
+                    <option value="CONFIRMED"  th:selected="${b.status == 'CONFIRMED'}">CONFIRMED</option>
+                    <option value="COMPLETED"  th:selected="${b.status == 'COMPLETED'}">COMPLETED</option>
+                    <option value="CANCELLED"  th:selected="${b.status == 'CANCELLED'}">CANCELLED</option>
+                  </select>
+                  <button type="submit"
+                    style="padding:5px 12px;border-radius:8px;border:1px solid rgba(79,126,255,0.3);background:rgba(79,126,255,0.2);
+                           color:#4F7EFF;font-family:'DM Sans';font-size:12px;cursor:pointer;transition:all 0.2s;"
+                    onmouseover="this.style.background='rgba(79,126,255,0.35)'"
+                    onmouseout="this.style.background='rgba(79,126,255,0.2)'">
+                    Save
+                  </button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="no-match" id="booking-no-match">No bookings match your search.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS TAB -->
+  <div id="tab-users" class="section">
+    <div class="card-admin">
+      <div class="card-title">Registered Users (<span th:text="${users.size()}">0</span>)</div>
+      <div class="search-wrap-admin">
+        <input type="text" class="search-bar" id="user-search" placeholder="Search by name or email…" oninput="filterTable('user-search','users-tbody','user-no-match')">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr th:each="u : ${users}">
+              <td th:text="${u.id}">1</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <div class="provider-avatar-sm" th:text="${u.fullName != null ? u.fullName.substring(0,1).toUpperCase() : '?'}">A</div>
+                  <span th:text="${u.fullName}">Name</span>
+                </div>
+              </td>
+              <td th:text="${u.email}">email</td>
+              <td th:text="${u.phone != null ? u.phone : '—'}">phone</td>
+              <td>
+                <span th:if="${u.role == 'admin'}"
+                      style="padding:3px 10px;border-radius:100px;background:rgba(255,107,107,0.12);border:1px solid rgba(255,107,107,0.3);color:#FF6B6B;font-size:12px;">ADMIN</span>
+                <span th:unless="${u.role == 'admin'}"
+                      style="padding:3px 10px;border-radius:100px;background:rgba(79,126,255,0.12);border:1px solid rgba(79,126,255,0.3);color:#4F7EFF;font-size:12px;"
+                      th:text="${u.role.toUpperCase()}">CUSTOMER</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="no-match" id="user-no-match">No users match your search.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD PROVIDER TAB -->
+  <div id="tab-add" class="section">
+    <div class="card-admin" style="max-width:700px;">
+      <div class="card-title">➕ Add New Provider</div>
+      <form action="/admin/add-provider" method="post" th:object="${newProvider}">
+        <div class="form-grid">
+          <div class="field"><label>Full Name</label><input type="text" th:field="*{name}" placeholder="e.g. Rajesh Kumar" required></div>
+          <div class="field"><label>Phone</label><input type="text" th:field="*{phone}" placeholder="9876543210"></div>
+          <div class="field">
+            <label>Category</label>
+            <select th:field="*{category}">
+              <option value="ac-repair">AC Repair</option>
+              <option value="electrician">Electrician</option>
+              <option value="plumber">Plumber</option>
+              <option value="washing-machine">Washing Machine</option>
+              <option value="refrigerator">Refrigerator Repair</option>
+              <option value="tv-installation">TV Installation</option>
+              <option value="deep-cleaning">Deep Cleaning</option>
+              <option value="bathroom-cleaning">Bathroom Cleaning</option>
+              <option value="sofa-cleaning">Sofa Cleaning</option>
+              <option value="carpet-cleaning">Carpet Cleaning</option>
+              <option value="kitchen-cleaning">Kitchen Cleaning</option>
+              <option value="haircut">Haircut</option>
+              <option value="makeup">Makeup Artist</option>
+              <option value="spa">Spa / Massage</option>
+              <option value="fitness">Fitness Trainer</option>
+              <option value="bike-servicing">Bike Servicing</option>
+              <option value="car-wash">Car Washing</option>
+              <option value="car-repair">Car Repair</option>
+              <option value="battery-replacement">Battery Replacement</option>
+              <option value="painting">Home Painting</option>
+              <option value="pest-control">Pest Control</option>
+              <option value="carpenter">Carpenter</option>
+              <option value="interior">Interior Decoration</option>
+              <option value="emergency-electrician">Emergency Electrician</option>
+              <option value="emergency-plumber">Emergency Plumber</option>
+              <option value="locksmith">Locksmith</option>
+            </select>
+          </div>
+          <div class="field"><label>Location / Area</label><input type="text" th:field="*{location}" placeholder="e.g. Koramangala"></div>
+          <div class="field"><label>Experience</label><input type="text" th:field="*{experience}" placeholder="e.g. 5 years"></div>
+          <div class="field"><label>Price/hr (₹)</label><input type="number" th:field="*{pricePerHour}" placeholder="299"></div>
+          <div class="field"><label>Rating (1-5)</label><input type="number" th:field="*{rating}" placeholder="4.5" step="0.1" min="1" max="5"></div>
+          <div class="field"><label>Review Count</label><input type="number" th:field="*{reviewCount}" placeholder="0"></div>
+          <div class="field field-full"><label>Description</label><input type="text" th:field="*{description}" placeholder="Brief bio / speciality"></div>
+        </div>
+        <button type="submit" class="btn-add">Add Provider</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<!-- EDIT PROVIDER MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Edit Provider</div>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <form id="edit-form" method="post">
+      <div class="modal-form-grid">
+        <div class="modal-field">
+          <label>Full Name</label>
+          <input type="text" name="name" id="edit-name" required>
+        </div>
+        <div class="modal-field">
+          <label>Phone</label>
+          <input type="text" name="phone" id="edit-phone">
+        </div>
+        <div class="modal-field">
+          <label>Location</label>
+          <input type="text" name="location" id="edit-location">
+        </div>
+        <div class="modal-field">
+          <label>Experience</label>
+          <input type="text" name="experience" id="edit-experience">
+        </div>
+        <div class="modal-field">
+          <label>Price/hr (₹)</label>
+          <input type="number" name="pricePerHour" id="edit-price" step="0.01">
+        </div>
+        <div class="modal-field">
+          <label>Rating (1–5)</label>
+          <input type="number" name="rating" id="edit-rating" step="0.1" min="1" max="5">
+        </div>
+        <div class="modal-field">
+          <label>Review Count</label>
+          <input type="number" name="reviewCount" id="edit-reviewCount">
+        </div>
+        <div class="modal-field full">
+          <label>Description</label>
+          <textarea name="description" id="edit-description"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-modal-cancel" onclick="closeEditModal()">Cancel</button>
+        <button type="submit" class="btn-modal-save">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+  // TAB NAVIGATION
+  function showTab(name, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    if (el) el.classList.add('active');
+  }
+
+  // TABLE SEARCH
+  function filterTable(inputId, tbodyId, noMatchId) {
+    const term = document.getElementById(inputId).value.toLowerCase();
+    const rows = document.querySelectorAll('#' + tbodyId + ' tr');
+    let visible = 0;
+    rows.forEach(row => {
+      const match = row.textContent.toLowerCase().includes(term);
+      row.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    const nm = document.getElementById(noMatchId);
+    if (nm) nm.style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  // EDIT MODAL
+  function openEditModal(id, name, phone, location, experience, price, rating, reviewCount, description) {
+    document.getElementById('edit-form').action = '/admin/edit-provider/' + id;
+    document.getElementById('edit-name').value = name;
+    document.getElementById('edit-phone').value = phone;
+    document.getElementById('edit-location').value = location;
+    document.getElementById('edit-experience').value = experience;
+    document.getElementById('edit-price').value = price;
+    document.getElementById('edit-rating').value = rating;
+    document.getElementById('edit-reviewCount').value = reviewCount;
+    document.getElementById('edit-description').value = description;
+    document.getElementById('edit-modal').classList.add('open');
+  }
+  function closeEditModal() {
+    document.getElementById('edit-modal').classList.remove('open');
+  }
+  // Close modal on backdrop click
+  document.getElementById('edit-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditModal();
+  });
+
+  // INITIALIZE DASHBOARD CHART
+  document.addEventListener('DOMContentLoaded', () => {
+    const pending = /*[[${bookings.?[status == 'PENDING'].size()}]]*/ 0;
+    const confirmed = /*[[${bookings.?[status == 'CONFIRMED'].size()}]]*/ 0;
+    const completed = /*[[${bookings.?[status == 'COMPLETED'].size()}]]*/ 0;
+    const cancelled = /*[[${bookings.?[status == 'CANCELLED'].size()}]]*/ 0;
+
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Pending', 'Confirmed', 'Completed', 'Cancelled'],
+            datasets: [{
+                label: 'Bookings',
+                data: [pending, confirmed, completed, cancelled],
+                backgroundColor: [
+                    'rgba(255, 200, 0, 0.7)',
+                    'rgba(34, 211, 165, 0.7)',
+                    'rgba(108, 99, 255, 0.7)',
+                    'rgba(255, 107, 107, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(255, 200, 0, 1)',
+                    'rgba(34, 211, 165, 1)',
+                    'rgba(108, 99, 255, 1)',
+                    'rgba(255, 107, 107, 1)'
+                ],
+                borderWidth: 1,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    ticks: { color: 'rgba(255, 255, 255, 0.5)', stepSize: 1 }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: 'rgba(255, 255, 255, 0.7)', font: { family: 'DM Sans', size: 13 } }
+                }
+            }
+        }
+    });
+  });
+/*]]>*/
+</script>
+</body>
+</html>

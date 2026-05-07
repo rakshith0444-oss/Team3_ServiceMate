@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify OTP — ServiceMate</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#080B14;--surface:#0F1320;--surface2:#161C2E;--border:rgba(255,255,255,0.07);--white:#FFFFFF;--muted:rgba(255,255,255,0.45);--brand:#4F7EFF;--brand2:#8B5CF6;--green:#22D3A5;--accent:#FF6B6B;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+  .orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
+  .orb1{width:500px;height:500px;background:rgba(79,126,255,0.12);top:-150px;left:-100px;}
+  .orb2{width:400px;height:400px;background:rgba(139,92,246,0.10);bottom:-100px;right:-80px;}
+  .card{position:relative;z-index:1;width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px;text-align:center;}
+  .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;letter-spacing:-0.5px;margin-bottom:32px;}
+  .logo span{background:linear-gradient(135deg,var(--brand),var(--brand2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .otp-icon{font-size:3rem;margin-bottom:16px;}
+  .card-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:8px;}
+  .card-sub{font-size:14px;color:var(--muted);margin-bottom:8px;}
+  .email-badge{display:inline-block;background:var(--surface2);border:1px solid var(--border);padding:6px 14px;border-radius:100px;font-size:13px;color:var(--brand);margin-bottom:28px;}
+  .error-box{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.3);border-radius:12px;padding:12px 16px;font-size:14px;color:var(--accent);margin-bottom:20px;text-align:left;}
+  .success-box{background:rgba(34,211,165,0.1);border:1px solid rgba(34,211,165,0.3);border-radius:12px;padding:12px 16px;font-size:14px;color:var(--green);margin-bottom:20px;}
+  /* 6-digit OTP inputs */
+  .otp-inputs{display:flex;gap:10px;justify-content:center;margin-bottom:28px;}
+  .otp-inputs input{width:52px;height:60px;border-radius:14px;border:1.5px solid var(--border);background:var(--surface2);color:var(--white);font-size:24px;font-weight:700;text-align:center;transition:all 0.2s;outline:none;}
+  .otp-inputs input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(79,126,255,0.2);}
+  .btn-verify{width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.2s;margin-bottom:16px;}
+  .btn-verify:hover{opacity:0.9;transform:translateY(-1px);}
+  .resend-row{font-size:13px;color:var(--muted);}
+  .resend-row a{color:var(--brand);text-decoration:none;font-weight:500;}
+  .resend-row a:hover{text-decoration:underline;}
+  .back-link{display:block;margin-top:16px;font-size:13px;color:var(--muted);}
+  .back-link a{color:var(--muted);text-decoration:none;}
+  .back-link a:hover{color:var(--white);}
+  /* Timer */
+  #timer{font-size:13px;color:var(--muted);margin-bottom:10px;}
+  #timer span{color:var(--accent);font-weight:600;}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="card">
+  <div class="logo">Service<span>Mate</span></div>
+  <div class="otp-icon">📧</div>
+  <h1 class="card-title">Check Your Email</h1>
+  <p class="card-sub">We sent a 6-digit code to</p>
+  <div class="email-badge" th:text="${email}">user@email.com</div>
+
+  <!-- Success / Error messages -->
+  <div class="success-box" th:if="${param.resent}">A new OTP has been sent!</div>
+  <div class="error-box" th:if="${error}" th:text="${error}"></div>
+
+  <!-- OTP timer -->
+  <div id="timer">Code expires in <span id="countdown">5:00</span></div>
+
+  <!-- OTP form — 6 separate input boxes that join into hidden field -->
+  <form id="otpForm" th:action="@{/verify-otp}" method="post">
+    <div class="otp-inputs">
+      <input type="text" id="d1" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+      <input type="text" id="d2" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+      <input type="text" id="d3" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+      <input type="text" id="d4" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+      <input type="text" id="d5" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+      <input type="text" id="d6" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+    </div>
+    <input type="hidden" id="otpHidden" name="otp">
+    <button type="submit" class="btn-verify" id="verifyBtn">Verify OTP →</button>
+  </form>
+
+  <div class="resend-row">
+    Didn't receive it? <a href="/resend-otp">Resend OTP</a>
+  </div>
+  <div class="back-link"><a href="/login">← Use a different email</a></div>
+</div>
+
+<script>
+  // ── Auto-focus & auto-advance OTP inputs ─────────────────────────────────
+  const digits = ['d1','d2','d3','d4','d5','d6'].map(id => document.getElementById(id));
+
+  digits.forEach((el, i) => {
+    el.addEventListener('input', () => {
+      el.value = el.value.replace(/\D/g, '').slice(-1);
+      if (el.value && i < 5) digits[i + 1].focus();
+    });
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !el.value && i > 0) digits[i - 1].focus();
+    });
+    // Paste support
+    el.addEventListener('paste', e => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'');
+      pasted.split('').forEach((ch, idx) => { if (digits[idx]) digits[idx].value = ch; });
+      const next = Math.min(pasted.length, 5);
+      digits[next].focus();
+    });
+  });
+
+  // ── Assemble hidden field before submit ───────────────────────────────────
+  document.getElementById('otpForm').addEventListener('submit', e => {
+    const code = digits.map(d => d.value).join('');
+    if (code.length < 6) { e.preventDefault(); alert('Please enter all 6 digits.'); return; }
+    document.getElementById('otpHidden').value = code;
+  });
+
+  // Focus first digit on load
+  digits[0].focus();
+
+  // ── 5-minute countdown ────────────────────────────────────────────────────
+  let seconds = 300;
+  const el = document.getElementById('countdown');
+  const tick = setInterval(() => {
+    seconds--;
+    const m = Math.floor(seconds / 60), s = seconds % 60;
+    el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    if (seconds <= 0) {
+      clearInterval(tick);
+      el.textContent = 'Expired';
+      document.getElementById('verifyBtn').disabled = true;
+    }
+  }, 1000);
+</script>
+</body>
+</html>
